@@ -1,6 +1,6 @@
 #-----------------------------------------------------
-# Projet :
-# File   :
+# Projet : Magnetic Hanoi Tower
+# File   : Hanoi_Main.asm
 #
 #-----------------------------------------------------
 
@@ -31,4 +31,3 @@ Sub_Prog:
 
      	ldw     r31, 0(r27)	# restaure the RA register
       	addi    r27, r27, 4
-      	ret
