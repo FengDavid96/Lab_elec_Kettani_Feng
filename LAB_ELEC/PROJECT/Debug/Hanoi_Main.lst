@@ -1,0 +1,31 @@
+#-------------------------------------------------------------------#
+#	NIOS II Assembly	 File : \Hanoi_Main.asm
+#-------------------------------------------------------------------#
+
+#Adress     Bin-code   source line
+
+                       |                      #-----------------------------------------------------
+                       |                      # Projet : Magnetic Hanoi Tower
+                       |                      # File   : Hanoi_Main.asm
+                       |                      #
+                       |                      #-----------------------------------------------------
+                       |            .data                   
+00000900:              |TopA:                 					# top of stack
+  00000900: 00 x 064     |            .skip   16*4  # manage memory for 16 value of 4 bytes (i.e. 16 Words)
+00000940:              |StackA:               					# bottom of stack
+  00000940: 00 x 004     |Counter:    .skip   4  # some other data of program
+                       |                      # start of program is defined by the next directive 
+                       |            .text                   
+00F00000:              |Prog_Main:            			    # <label> of begin program
+00F00000:   02000034   |            movia   r8, StackA  # load address of symbol
+            42025014   |
+00F00008:   010000C4   |            addi    r4, r0, 3
+00F0000C:   0F000180   |            call    Sub_Prog
+00F00010:   0000B03A   |            nop                     
+00F00014:   003B683A   |            trap                      			    # this instruction is the end of program
+00F00018:              |Sub_Prog:           
+00F00018:   DEFFFF04   |            addi    r27, r27, -4  # manage space in the stack and ...
+00F0001C:   DFC00015   |            stw     r31, 0(r27)  # save the RA (return address) register
+00F00020:   0000B03A   |            nop                       			# insert your code
+00F00024:   DFC00017   |            ldw     r31, 0(r27)  # restaure the RA register
+00F00028:   DEC00104   |            addi    r27, r27, 4
