@@ -22,14 +22,18 @@
 #   pile B: B/R
 #   pile C: B/R
 
+START:
         # store a super large disk at the bottom of each pile
 
         addi    r17, r0, 0x00ff     # R/B for src pile
         stw     r17, 0(r8)
         addi    r8, r8, 4
+
         addi    r17, r0, 0xffff     # B/R for dst/tmp pile
+
         stw     r17, 0(r9)
         addi    r9, r9, 4
+
         stw     r17, 0(r10)
         addi    r10, r10, 4
 
@@ -37,6 +41,7 @@
 
         addi    r4, r0, 7           # n = 7
         add     r16, r0, r4
+
 loop:   stw     r16, 0(r8)
         addi    r8, r8, 4
         addi    r16, r16, -1
