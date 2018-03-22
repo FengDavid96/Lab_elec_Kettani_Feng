@@ -22,24 +22,23 @@
 #   pile B: B/R
 #   pile C: B/R
 
-START:
-        # store a super large disk at the bottom of each pile
+START:  addi    r4, r0, 7           # n = 7
+        call Hanoi
+        stop
 
-        addi    r17, r0, 0x00ff     # R/B for src pile
-        stw     r17, 0(r8)
-        addi    r8, r8, 4
+# store a super large disk at the bottom of each pile
+Hanoi:  addi    r17, r0, 0x00ff     # R/B for src pile
+        stw     r17, 0(r8)          # Store spA
+        addi    r8, r8, 4           # beginning of the stack Tower A
 
         addi    r17, r0, 0xffff     # B/R for dst/tmp pile
+        stw     r17, 0(r9)          # Store spB
+        addi    r9, r9, 4           # beginning of the stack Tower B
 
-        stw     r17, 0(r9)
-        addi    r9, r9, 4
-
-        stw     r17, 0(r10)
-        addi    r10, r10, 4
+        stw     r17, 0(r10)         # Store spC
+        addi    r10, r10, 4         # beginning of the stack Tower C
 
         # store n disks on src pile in the decreasing size order
-
-        addi    r4, r0, 7           # n = 7
         add     r16, r0, r4
 
 loop:   stw     r16, 0(r8)
@@ -57,14 +56,72 @@ loop:   stw     r16, 0(r8)
         # stack B = 1
         # stack C = 2
 
-        addi    r5, r0, 0           # src = A (R/B)
+main:   addi    r5, r0, 0           # src = A (R/B)
         addi    r6, r0, 1           # dst = B (B/R)
         addi    r7, r0, 2           # tmp = C (B/R)
-        call    mhanoi
+        call    move
         stop
 
-# move error
+# Define movement
+move:   beq     r5, r0, AtoC
+        
 
+# test if we have a color error or size error
+#srcA:   
+        
+#srcB:   
+        
+#srcC:   
+        
+
+AtoB:   addi    r8, r8, -4
+        ldw     r23, 0(r8)
+        stw     r0, 0(r8)
+        stw     r23, 0(r9)
+        addi    r9, r9, 4
+        br      done
+
+AtoC:   addi    r8, r8, -4
+        ldw     r23, 0(r8)
+        stw     r0, 0(r8)
+        stw     r23, 0(r10)
+        addi    r10, r10, 4
+        br      done
+
+BtoA:   addi    r9, r9, -4
+        ldw     r23, 0(r9)
+        stw     r0, 0(r9)
+        stw     r23, 0(r8)
+        addi    r8, r8, 4
+        br      done
+
+
+BtoC:   addi    r9, r9, -4
+        ldw     r23, 0(r9)
+        stw     r0, 0(r9)
+        stw     r23, 0(r10)
+        addi    r10, r10, 4
+        br      done
+
+
+CtoA:   addi    r10, r10, -4
+        ldw     r23, 0(r10)
+        stw     r0, 0(r10)
+        stw     r23, 0(r8)
+        addi    r8, r8, 4
+        br      done
+
+
+CtoB:   addi    r10, r10, -4
+        ldw     r23, 0(r10)
+        stw     r0, 0(r10)
+        stw     r23, 0(r9)
+        addi    r9, r9, 4
+        br      done
+
+done:   ret
+        
+# move error
 errorC: addi    r2, r0, -1          # color error
         stop
 
