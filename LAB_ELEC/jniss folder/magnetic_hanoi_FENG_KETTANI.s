@@ -63,7 +63,7 @@ main:   addi    r5, r0, 0           # src = A (R/B)
         stop
 
 # Define movement
-move:   beq     r5, r0, AtoC
+move:   beq     r5, r0, AtoB
         
 
 # test if we have a color error or size error
@@ -77,6 +77,9 @@ move:   beq     r5, r0, AtoC
 AtoB:   addi    r8, r8, -4
         ldw     r23, 0(r8)
         stw     r0, 0(r8)
+        addi    r20, 0xff00
+#        bgt     r23, r20, flipRB
+#        blt     r23, r20, flipBR
         stw     r23, 0(r9)
         addi    r9, r9, 4
         br      done
@@ -118,6 +121,12 @@ CtoB:   addi    r10, r10, -4
         stw     r23, 0(r9)
         addi    r9, r9, 4
         br      done
+
+#flipRB: subi    r23, r23, 0xff00
+#        br done
+
+#flipBR: addi    r23, r23, 0xff00
+#        br done
 
 done:   ret
         
