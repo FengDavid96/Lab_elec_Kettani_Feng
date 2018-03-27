@@ -11,7 +11,7 @@
         xor     r2, r2, r2
         addi    r8, r0, 0           # r8  = 0x0000
         addi    r9, r0, 64          # r9  = 0x0040
-        addi    r10, r0, 128        # r10 = 0x0060
+        addi    r10, r0, 128        # r10 = 0x0080
 
 # byte 0: size of disk
 # byte 1: color of disk
@@ -23,11 +23,11 @@
 #   pile C: B/R
 
 START:  addi    r4, r0, 7           # n = 7
-        call Hanoi
+        call mhanoi
         stop
 
 # store a super large disk at the bottom of each pile
-Hanoi:  addi    r17, r0, 0x00ff     # R/B for src pile
+mhanoi: addi    r17, r0, 0x00ff     # R/B for src pile
         stw     r17, 0(r8)          # Store spA
         addi    r8, r8, 4           # beginning of the stack Tower A
 
@@ -61,12 +61,22 @@ main:   addi    r5, r0, 0           # src = A (R/B)
         addi    r7, r0, 2           # tmp = C (B/R)
         addi    r20, r20, 0xff00
         addi    r21, r21, 0x00ff
-        call    move
+
+        call swap
         stop
+
+swap:   
+
+# n paire : C
+# n impaire : B
+# conditions : taille, retour, couleur
+
 
 # Define movement
 move:   beq     r5, r0, AtoB
-        
+move1:  beq     r5, r0, AtoC
+move2:  beq     r5, r0, BtoA
+move3:  beq     r5, r0, CtoA
 
 # test if we have a color error or size error
 #srcA:   
@@ -79,7 +89,7 @@ move:   beq     r5, r0, AtoB
 AtoB:   addi    r8, r8, -4
         ldw     r23, 0(r8)
         stw     r0, 0(r8)
-        addi    r23, r23, r20 # passage 0x00 to 0xff
+        add    r23, r23, r20 # passage 0x00 to 0xff
         stw     r23, 0(r9)
         addi    r9, r9, 4
         br      done
@@ -87,7 +97,7 @@ AtoB:   addi    r8, r8, -4
 AtoC:   addi    r8, r8, -4
         ldw     r23, 0(r8)
         stw     r0, 0(r8)
-        addi    r23, r23, r20 # passage 0x00 to 0xff
+        add    r23, r23, r20 # passage 0x00 to 0xff
         stw     r23, 0(r10)
         addi    r10, r10, 4
         br      done
@@ -95,7 +105,7 @@ AtoC:   addi    r8, r8, -4
 BtoA:   addi    r9, r9, -4
         ldw     r23, 0(r9)
         stw     r0, 0(r9)
-        and     r23, r23, r20 # passage 0xff to 0x00
+        and     r23, r23, r21 # passage 0xff to 0x00
         stw     r23, 0(r8)
         addi    r8, r8, 4
         br      done
@@ -112,7 +122,7 @@ BtoC:   addi    r9, r9, -4
 CtoA:   addi    r10, r10, -4
         ldw     r23, 0(r10)
         stw     r0, 0(r10)
-        and     r23, r23, r20 # passage 0xff to 0x00
+        and     r23, r23, r21 # passage 0xff to 0x00
         stw     r23, 0(r8)
         addi    r8, r8, 4
         br      done
@@ -125,15 +135,7 @@ CtoB:   addi    r10, r10, -4
         addi    r9, r9, 4
         br      done
 
-
-flipRB: addi    r23, r23, 0x0100
-        ret
-
-flipBR: addi    r23, r23, 0x0100
-        ret
-
-
-done:   addi    r3, r3, 1 # numero step
+done:   addi    r3, r3, 1 # numerous step
         ret
         
 # move error
