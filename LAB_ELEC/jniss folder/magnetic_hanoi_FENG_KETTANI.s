@@ -22,9 +22,11 @@
 #   pile B: B/R
 #   pile C: B/R
 
-START:  addi    r4, r0, 3           # n = 7
+START:  addi    r4, r0, 7           # n = 7
+
         xor     r24,r24,r24
         xor     r25,r25,r25
+
         addi    r24, r0, 1          # set 1 -> r24
         addi    r25, r0, 2          # set 2 -> r25
         call    hanoi
@@ -67,22 +69,24 @@ main:   addi    r5, r0, 0           # src = A (R/B)
         addi    r20, r20, 0xff00    # for adding 0xff
         addi    r21, r21, 0x00ff    # for sub 0xff by doing an add logic
 
-        call    swap
+        call    mhanoi
         stop
 
-swap:   addi    r27, r27, -20
+mhanoi: addi    r27, r27, -16
         stw     r31, 0(r27)       # return address
         stw     r4, 4(r27)        # N
         stw     r5, 8(r27)        # src
         stw     r6, 12(r27)       # dst
         stw     r7, 16(r27)       # tmp
 
-# mhanoi(N-1, src, tmp)
-        ldw     r4, 4(r27)
-        addi    r4, r4, -1
-        ldw     r5, 16(r27)
-        ldw     r6, 12(r27)
-        ldw     r7, 8(r27)
+        beq     r4, r24, cond1    # if n=1
+
+# mhanoi(N-1, src, tmp,dst)
+        ldw     r4, 4(r27)        # load n
+        addi    r4, r4, -1        # r4 = n-1
+        ldw     r5, 8(r27)
+        ldw     r6, 16(r27)
+        ldw     r7, 12(r27)
 
         call    mhanoi
 
@@ -97,45 +101,26 @@ swap:   addi    r27, r27, -20
         ldw     r4, 4(r27)
         addi    r4, r4, -1
         ldw     r5, 16(r27)
-        ldw     r6, 12(r27)
-        ldw     r7, 8(r27)
+        ldw     r6, 8(r27)
+        ldw     r7, 12(r27)
 
         call    mhanoi
 
 # mhanoi(N-1, src, dst)
         ldw     r4, 4(r27)
         addi    r4, r4, -1
-        ldw     r5, 16(r27)
+        ldw     r5, 8(r27)
         ldw     r6, 12(r27)
-        ldw     r7, 8(r27)
+        ldw     r7, 16(r27)
 
         call    mhanoi
 
         br fin
 
-
-
-
-# n paire : C
-# n impaire : B
-# conditions : taille, retour, couleur
-
-mhanoi: addi    r27, r27, -20
-        stw     r31, 0(r27)       # return address
-        stw     r4, 4(r27)        # N
-        stw     r5, 8(r27)        # src
-        stw     r6, 12(r27)       # dst
-        stw     r7, 16(r27)       # tmp
-
-        beq     r4, r24, cond1
-
-cond1:  stw     r5, 8(r27)        # src
-        stw     r6, 12(r27)       # dst
-        stw     r7, 16(r27)       # tmp
-
+cond1:  ldw     r5, 8(r27)
+        ldw     r6, 12(r27)
+        ldw     r7, 16(r27)
         call    move
-
-        br fin
 
 # fin
 fin:    stw     r31, 0(r27)       # return address
@@ -143,20 +128,47 @@ fin:    stw     r31, 0(r27)       # return address
         stw     r5, 8(r27)        # src
         stw     r6, 12(r27)       # dst
         stw     r7, 16(r27)       # tmp
-        addi    r27, r27, 20      # back to position
+        addi    r27, r27, 16      # back to position
         ret
 
 
 # Define movement
-move:   beq     r5, r24, srcB
+move:   beq     r5, r24, srcB     # if r5=1, src = B
+        beq     r5, r25, srcC     # if r5=2, src = C
 
 # test if we have a color error or size error
-#srcA:   
-        
-srcB:    beq    r6, r0, BtoA
-         br     errorC
-#srcC:   
-        
+srcA:   beq     r6, r24, sizAB     # if r5=0 && r6=1, AtoB
+        beq     r6, r25, sizAC     # if r5=0 && r6=2, AtoC
+        br      errorS
+
+srcB:   beq     r6, r0, sizBA     # if r5=1 && r6=0, BtoA
+        beq     r6, r25, errorC   # if r5=1 && r6=2, BtoC but error color
+        br      errorS
+
+srcC:   beq     r6, r0, sizCA     # if r5=2 && r6=0, CtoA
+        beq     r6, r24, errorC   # if r5=2 && r6=1, CtoB but error color
+        br      errorS
+
+
+sizAB:  ldw     r23, 0(r8)
+        ldw     r22, -4(r9)
+        blt     r23, r22, AtoB
+        br      errorS
+
+sizAC:  ldw     r23, 0(r8)
+        ldw     r22, -4(r10)
+        blt     r23, r22, AtoC
+        br      errorS
+
+sizBA:  ldw     r23, 0(r9)
+        ldw     r22, -4(r8)
+        blt     r23, r22, BtoA
+        br      errorS
+
+sizCA:  ldw     r23, 0(r10)
+        ldw     r22, -4(r8)
+        blt     r23, r22, CtoA
+        br      errorS
 
 AtoB:   addi    r8, r8, -4
         ldw     r23, 0(r8)
@@ -166,7 +178,6 @@ AtoB:   addi    r8, r8, -4
         addi    r9, r9, 4
         br      done
 
-
 AtoC:   addi    r8, r8, -4
         ldw     r23, 0(r8)
         stw     r0, 0(r8)
@@ -174,7 +185,6 @@ AtoC:   addi    r8, r8, -4
         stw     r23, 0(r10)
         addi    r10, r10, 4
         br      done
-
 
 BtoA:   addi    r9, r9, -4
         ldw     r23, 0(r9)
@@ -184,14 +194,12 @@ BtoA:   addi    r9, r9, -4
         addi    r8, r8, 4
         br      done
 
-
 BtoC:   addi    r9, r9, -4
         ldw     r23, 0(r9)
         stw     r0, 0(r9)
         stw     r23, 0(r10)
         addi    r10, r10, 4
         br      done
-
 
 CtoA:   addi    r10, r10, -4
         ldw     r23, 0(r10)
@@ -201,7 +209,6 @@ CtoA:   addi    r10, r10, -4
         addi    r8, r8, 4
         br      done
 
-
 CtoB:   addi    r10, r10, -4
         ldw     r23, 0(r10)
         stw     r0, 0(r10)
@@ -209,7 +216,7 @@ CtoB:   addi    r10, r10, -4
         addi    r9, r9, 4
         br      done
 
-done:   addi    r3, r3, 1 # numerous step
+done:   addi    r3, r3, 1           # numerous step
         ret
 
 # move error
