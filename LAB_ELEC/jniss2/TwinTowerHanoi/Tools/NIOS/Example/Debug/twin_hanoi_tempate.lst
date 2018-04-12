@@ -1,0 +1,68 @@
+#-------------------------------------------------------------------#
+#	NIOS II Assembly	 File : \twin_hanoi_tempate.asm
+#-------------------------------------------------------------------#
+
+#Adress     Bin-code   source line
+
+                       |                      # Twin Tower of Hanoi game
+                       |                      #
+                       |                      # assume that input n is in r4, src/dst/tmp in r5/r6/r7
+                       |                      # return the number of steps in r2
+                       |                      # Stacks A/B/C are located in memory locations [0: 63], [64: 127], and [128, 191]
+                       |                      # r8/r9/r10 are designated as stack points for A/B/C
+                       |                      # Initially, stack pointers for A/B/C point to memory locations 0, 64, and 128 (initial TOS)
+                       |                      # Stacks are assumed to grow upward
+                       |                    
+00F00000:   1084F03A   |            xor     r2, r2, r2
+                       |                    
+00F00004:   02000004   |            addi    r8, r0, 0  # r8  = 0x0000
+                       |                    
+00F00008:   02401004   |            addi    r9, r0, 64  # r9  = 0x0040
+                       |                    
+00F0000C:   02802004   |            addi    r10, r0, 128  # r10 = 0x0060
+                       |                    
+00F00010:   010001C4   |            addi    r4, r0, 7  # n = 7
+                       |                      # Place blue disks in pile A
+                       |                      #   Blue disks are FF00, FF01, FF02, etc. from the smallest to the largest
+                       |                    
+                       |                    
+00F00014:   0121883A   |            add     r16, r0, r4
+                       |                    
+00F00018:   847FC014   |            ori     r17, r16, 0xff00
+                  ++++  Erreur instruction : 13
+00F0001C:              |loopA:              
+00F0001C:   44400015   |            stw     r17, 0(r8)      
+                       |                    
+00F00020:   42000104   |            addi    r8, r8, 4
+                       |                    
+00F00024:   843FFFC4   |            addi    r16, r16, -1
+                       |                    
+00F00028:   847FC014   |            ori     r17, r16, 0xff00
+                  ++++  Erreur instruction : 13
+                       |                    
+00F0002C:   803FFB1E   |            bne     r16, r0, loopA
+                       |                      # Place white disks in pile B
+                       |                      #   White disks are 0000, 0001, 0002, etc. from the smallest to the largest
+                       |                    
+00F00030:   0121883A   |            add     r16, r0, r4
+00F00034:              |loopB:              
+00F00034:   4C000015   |            stw     r16, 0(r9)      
+                       |                    
+00F00038:   4A400104   |            addi    r9, r9, 4
+                       |                    
+00F0003C:   843FFFC4   |            addi    r16, r16, -1
+                       |                    
+00F00040:   803FFC1E   |            bne     r16, r0, loopB
+                       |                      # Call swap(n, A, B)
+                       |                    
+00F00044:              |swap:               
+00F00044:   01400004   |            addi    r5, r0, 0  # src = A
+00F00048:   01800044   |            addi    r6, r0, 1  # dst = B
+00F0004C:   01C00084   |            addi    r7, r0, 2  # tmp = C
+                       |                      #call	swap
+00F00050:   003B683A   |            trap                    
+                       |                      # move error
+00F00054:              |error:              
+00F00054:   00BFFFC4   |            addi    r2, r0, -1
+                       |                    
+00F00058:   003B683A   |            trap                    

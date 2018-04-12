@@ -1,0 +1,39 @@
+#-------------------------------------------------------------------#
+#	NIOS II Assembly	 File : \power.asm
+#-------------------------------------------------------------------#
+
+#Adress     Bin-code   source line
+
+00F00000:   01000084   |            addi    r4, r0, 2  # set value 2 for a (base)
+                       |                    
+00F00004:   01400104   |            addi    r5, r0, 4  # set value 4 for n (power)
+                       |                    
+00F00008:   00800044   |            addi    r2, r0, 1  # initlialize r2 for restoring result
+                       |                    
+                       |                    
+00F0000C:   0F000140   |            call    power  # call procedure power
+                       |                    
+00F00010:   00000000   |            stop                    
+                  ++++  Erreur instruction : 19
+00F00014:   28000126   |power:      beq     r5, r0, p1  # if n == 0, switch to branch p1
+                       |                    
+00F00018:   00000406   |            br      p2  # else, switch to branch p2	
+00F0001C:   00800044   |p1:         addi    r2, r0, 1
+00F00020:   DEFFFF04   |            addi    r27, r27, -4
+00F00024:   DFC00017   |            ldw     r31, 0(r27)
+                       |                    
+00F00028:   F800283A   |            ret                     
+00F0002C:   297FFFC4   |p2:         addi    r5, r5, -1
+                       |                    
+00F00030:   DEFFFF04   |            addi    r27, r27, -4
+00F00034:   00000017   |            ldw     r31, 0(27)
+                  ++++  Erreur instruction : 23
+00F00038:   0F000140   |            call    power
+                       |                    
+00F0003C:   2085383A   |            mul     r2, r4, r2
+                       |                    
+00F00040:   DEC00104   |            addi    r27, r27, 4
+                       |                    
+00F00044:   DFC00017   |            ldw     r31, 0(r27)
+                       |                    
+00F00048:   F800283A   |            ret                     
